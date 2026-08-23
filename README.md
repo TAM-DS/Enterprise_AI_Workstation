@@ -317,7 +317,7 @@ Every production system eventually depends on layers beneath the application:
 
 Understanding those layers makes it easier to diagnose failures, evaluate architectural trade-offs, and build systems that can move beyond a developer's laptop.
 
-The workstation therefore isn't the destination.
+The workstation, therefore, isn't the destination.
 
 **It's the engineering foundation for everything built next.**
 
