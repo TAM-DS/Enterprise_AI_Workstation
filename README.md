@@ -10,6 +10,59 @@ They begin with the engineering environment underneath it.
 
 > **A workstation is infrastructure. Treat it like infrastructure.**
 
+## What This Repository Proves
+
+This repository is intentionally small.
+
+It is not a dotfiles archive, a catalog of every tool I have ever installed, or an attempt to make every project use the same dependencies.
+
+It demonstrates a narrower engineering idea:
+
+> **A development workstation can have declared state, explicit boundaries, and an executable health check.**
+
+- `Brewfile` declares the workstation-level baseline.
+- `scripts/doctor.sh` verifies that baseline without changing the machine.
+- Project dependencies stay with the projects that require them.
+- Credentials, API keys, and cloud authentication never belong in this repository.
+
+That separation is deliberate. A reproducible workstation should provide stable engineering capabilities without turning the machine into one giant global application environment.
+
+## Quick Start
+
+Review the `Brewfile`, then:
+
+```bash
+git clone https://github.com/TAM-DS/Enterprise_AI_Workstation.git
+cd Enterprise_AI_Workstation
+
+brew bundle --file Brewfile
+./scripts/doctor.sh
+```
+
+The doctor script is non-destructive. It verifies the declared Homebrew baseline, checks that expected CLIs are available on `PATH`, and reports whether the Docker engine is currently reachable.
+
+## Repository Contract
+
+| Artifact | Responsibility |
+|---|---|
+| `README.md` | Explains the architecture, boundaries, and engineering rationale |
+| `Brewfile` | Declares the workstation-level package baseline |
+| `scripts/doctor.sh` | Verifies that the declared baseline is present and locally usable |
+
+### Belongs at the workstation layer
+
+Operating-system package management, language runtimes, source control, terminal tooling, containers, orchestration and infrastructure CLIs, cloud CLIs, and development environments.
+
+### Stays at the project layer
+
+Python and Node application dependencies, model SDK versions, agent frameworks, RAG libraries, vector clients, project configuration, and tests.
+
+### Never belongs here
+
+Secrets, API keys, cloud credentials, tokens, private configuration, or production data.
+
+
+
 ---
 
 ## Why I Built It
@@ -107,15 +160,17 @@ It is understanding the operating environment beneath the application.
 
 ## 2. Package Management
 
-Homebrew provides a consistent mechanism for installing and maintaining much of the workstation's engineering toolchain.
-
-Centralized package management reduces ad hoc installation and makes upgrades, dependency management, and environment maintenance more deliberate.
+Homebrew provides the package-management layer, while the repository's `Brewfile` turns the intended workstation baseline into executable state.
 
 ```bash
-brew update
-brew upgrade
-brew list
+# Converge the machine toward the declared baseline
+brew bundle --file Brewfile
+
+# Verify the declared packages are present
+brew bundle check --file Brewfile
 ```
+
+The `Brewfile` is deliberately limited to workstation capabilities. Application dependencies remain in their own project manifests, where they can be versioned and tested independently.
 
 The principle is simple:
 
@@ -216,6 +271,8 @@ The environment supports work involving:
 - containerized AI services
 - cloud AI platforms
 
+Those application-level libraries are intentionally **not** installed globally by this repository. OpenAI SDKs, agent frameworks, RAG libraries, and similar dependencies belong to the project that requires them so their versions and tests travel with the code.
+
 This distinction matters.
 
 > **AI engineering is still engineering.**
@@ -232,19 +289,13 @@ A workstation isn't reproducible merely because software was installed successfu
 
 The environment should be verifiable.
 
-Examples include:
-
 ```bash
-python --version
-node --version
-npm --version
-git --version
-docker --version
-kubectl version --client
-terraform version
+./scripts/doctor.sh
 ```
 
-Cloud tooling can be verified independently as each provider is configured.
+The doctor script checks the macOS baseline, verifies the `Brewfile` state, confirms expected engineering and cloud CLIs are available on `PATH`, and distinguishes an installed Docker CLI from a reachable Docker engine.
+
+It does **not** authenticate to cloud providers, mutate configuration, install packages, or inspect credentials.
 
 The objective is a simple one:
 
@@ -287,16 +338,17 @@ Strong engineering requires being able to move down those layers when something 
 | Layer | Technologies |
 |---|---|
 | Operating Environment | macOS / Unix |
-| Package Management | Homebrew |
-| Languages | Python, Node.js |
+| Package Management | Homebrew / Brewfile |
+| Languages | Python 3.13, Node.js |
+| Python Project Tooling | uv |
 | Source Control | Git, GitHub |
-| Containers | Docker |
-| Orchestration | Kubernetes |
+| Containers | Docker Desktop |
+| Orchestration | Kubernetes CLI |
 | Infrastructure as Code | Terraform |
-| Cloud | AWS, Google Cloud, Microsoft Azure |
+| Cloud CLIs | AWS CLI, Azure CLI, Google Cloud CLI |
 | Development | VS Code, PyCharm |
 | Terminal Workflow | Unix CLI, tmux |
-| AI Engineering | OpenAI SDK, RAG, Agents, MCP, Vector Systems |
+| AI Engineering | Project-scoped SDKs, agents, RAG, MCP, vector systems |
 
 ---
 
